@@ -10,7 +10,7 @@ The server will listen for POST requests on the `/cookie_jar` endpoint of the fo
 ```
 url - the url to store the cookie at
 name - the name of the cookie
-value - the value of the cookie (must be an integer)
+value - the value of the cookie
 ```
 
 When a valid cookie is received, it will be added to Chrome's cookie database, and

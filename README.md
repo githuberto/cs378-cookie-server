@@ -3,10 +3,10 @@ Flask server which receives stolen cookies and adds them to Chrome. Made for CS3
 
 To run the server, make sure Flask is installed and run
 ```
-python3 server.py <path to cookie db>
+python3 server.py <path to Chrome cookie db>
 ```
 
-The server will listen for POST requests on the `/cookie_jar` endpoint
+The server will listen for POST requests on the `/cookie_jar` endpoint of the form:
 ```
 url - the url to store the cookie at
 name - the name of the cookie

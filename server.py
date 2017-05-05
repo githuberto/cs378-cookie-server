@@ -5,6 +5,7 @@ import validators
 
 from flask import Flask, request, render_template
 from flask_api import status
+from flask_cors import CORS, cross_origin
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -20,6 +21,8 @@ EXPIRES_UTC = 13435828750000000
 ACCESSED_UTC = 13133004531246831
 
 app = Flask(__name__)
+CORS(app)
+
 
 if len(sys.argv) < 2:
     print("Usage: python3 server.py <PATH_TO_CHROME_COOKIE_DATABASE>")

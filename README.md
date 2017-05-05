@@ -7,7 +7,7 @@ python3 server.py <path to Chrome cookie db>
 ```
 ## API
 ```
-/cookie_jar
+POST /cookie_jar
 url - the url to store the cookie at
 name - the name of the cookie
 value - the value of the cookie
@@ -16,7 +16,7 @@ When a valid cookie is received, it will be added to Chrome's cookie database, a
 Chrome will open at the target url.
 
 ```
-/store_cookie
+POST /store_cookie
 url - the url to store for redirection
 ```
 When a valid URL is stored, the `/redirect` endpoint will redirect there.
